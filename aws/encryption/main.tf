@@ -61,7 +61,7 @@ resource "aws_kms_key" "main" {
         }
       ],
       # Key administrators (if different from root)
-      length(var.key_admin_arns) > 0 ? [
+      length(var.key_admin_arns) > 0 ? tolist([
         {
           Sid    = "AllowKeyAdministration"
           Effect = "Allow"
@@ -86,9 +86,9 @@ resource "aws_kms_key" "main" {
           ]
           Resource = "*"
         }
-      ] : [],
+      ]) : tolist([]),
       # Key users
-      length(var.key_user_arns) > 0 ? [
+      length(var.key_user_arns) > 0 ? tolist([
         {
           Sid    = "AllowKeyUsage"
           Effect = "Allow"
@@ -122,9 +122,9 @@ resource "aws_kms_key" "main" {
             }
           }
         }
-      ] : [],
+      ]) : tolist([]),
       # AWS Service principals
-      length(local.service_principals) > 0 ? [
+      length(local.service_principals) > 0 ? tolist([
         {
           Sid    = "AllowServiceUsage"
           Effect = "Allow"
@@ -145,9 +145,9 @@ resource "aws_kms_key" "main" {
             }
           }
         }
-      ] : [],
+      ]) : tolist([]),
       # Cross-account access
-      length(var.cross_account_arns) > 0 ? [
+      length(var.cross_account_arns) > 0 ? tolist([
         {
           Sid    = "AllowCrossAccountUsage"
           Effect = "Allow"
@@ -163,7 +163,7 @@ resource "aws_kms_key" "main" {
           ]
           Resource = "*"
         }
-      ] : []
+      ]) : tolist([])
     )
   })
 
@@ -302,6 +302,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "secure" {
   rule {
     id     = "transition-to-ia"
     status = "Enabled"
+    filter {}
 
     transition {
       days          = var.transition_to_ia_days
